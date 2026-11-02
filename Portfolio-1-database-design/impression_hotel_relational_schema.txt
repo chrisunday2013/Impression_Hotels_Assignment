@@ -1,0 +1,61 @@
+# Impression Hotel — Relational Database Schema
+
+## 1. GUESTS
+**Schema:** `GUESTS(guest_id, full_name, email, phone)`
+
+- **Primary Key:** `guest_id`
+- **Unique constraint:** `email`
+- **Not Null constraints:** `guest_id`, `full_name`, `email`
+
+## 2. ROOM_TYPES
+**Schema:** `ROOM_TYPES(room_type_id, type_name, nightly_rate)`
+
+- **Primary Key:** `room_type_id`
+- **Unique constraints:** `type_name`
+- **Not Null constraints:** `type_name`, `nightly_rate`
+- **Check constraint:** `nightly_rate >= 0`
+
+## 3. ROOMS
+**Schema:** `ROOMS(room_id, room_number, room_type_id, status)`
+
+- **Primary Key:** `room_id`
+- **Unique constraint:** `room_number`
+- **Foreign Key:** `room_type_id` references `ROOM_TYPES(room_type_id)`
+- **Not Null constraints:** `room_number`, `room_type_id`, `status`
+- **Default status:** `Available`
+- **Check constraint:** `status IN ('Available', 'Maintenance')`
+
+## 4. BOOKINGS
+**Schema:** `BOOKINGS(booking_id, guest_id, room_id, check_in, check_out, booking_status)`
+
+- **Primary Key:** `booking_id`
+- **Foreign Keys:**
+  - `guest_id` references `GUESTS(guest_id)`
+  - `room_id` references `ROOMS(room_id)`
+- **Not Null constraints:** `guest_id`, `room_id`, `check_in`, `check_out`, `booking_status`
+- **Default booking status:** `Pending`
+- **Check constraints:**
+  - `check_out > check_in`
+  - `booking_status IN ('Pending', 'Confirmed', 'Cancelled', 'Completed')`
+
+## 5. PAYMENTS
+**Schema:** `PAYMENTS(payment_id, booking_id, amount, payment_date, payment_status)`
+
+- **Primary Key:** `payment_id`
+- **Foreign Key:** `booking_id` references `BOOKINGS(booking_id)`
+- **Not Null constraints:** `booking_id`, `amount`, `payment_status`
+- **Check constraint:** `amount > 0`
+- **Default payment date:** `CURRENT_TIMESTAMP`
+- **Default payment status:** `Pending`
+- **Check constraint:** `payment_status IN ('Pending', 'Paid', 'Failed', 'Refunded')`
+
+## Relationships
+
+1. One guest can have multiple bookings.
+2. One room type can be associated with multiple rooms.
+3. One room can appear in multiple bookings over time.
+4. One booking can have multiple payment records.
+
+## Summary
+
+The schema uses primary keys to uniquely identify records, foreign keys to maintain referential integrity, unique constraints to prevent duplicate values, and check constraints to enforce valid data. These rules help maintain consistency and reliability in Impression Hotel's booking database.
