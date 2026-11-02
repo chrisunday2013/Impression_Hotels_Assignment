@@ -1,0 +1,21 @@
+# Impression Hotel — Query Performance Comparison
+
+## Objective
+To examine PostgreSQL's execution plan for retrieving confirmed bookings before and after creating an index on `bookings.booking_status`.
+
+## Index created
+`idx_bookings_status` on `bookings(booking_status)`.
+
+## Results
+- Both query executions returned three confirmed bookings.
+- The original execution plan used hash joins and a sequential scan on the rooms table.
+- The after-index plan used nested-loop joins and primary-key index scans on the guests and rooms tables.
+- The after-index plan continued to use a sequential scan on the bookings table rather than the new booking-status index.
+- The displayed execution time was approximately 0.093 ms before the index and 0.230 ms after the index. These are individual measurements and should not be treated as a reliable benchmark.
+
+## Interpretation
+The index was successfully created, but PostgreSQL did not select it for this query. Since the bookings table contains only five records, a sequential scan can be more efficient than an index scan. The change in execution plan and timings illustrates that the optimizer selects plans based on estimated cost and that small datasets are not sufficient for a reliable performance benchmark.
+
+## Conclusion
+
+The experiment successfully created the index `idx_bookings_status` on the `booking_status` column of the `bookings` table. However, PostgreSQL did not use this index when executing the confirmed-bookings query. The execution plan continued to use a sequential scan on the `bookings` table, while the join strategy changed from hash joins to nested-loop joins. The dataset contains only five booking records, so a sequential scan may be more economical than using an index. The recorded execution times were approximately 0.093 ms before indexing and 0.230 ms after indexing, but these individual measurements are too small to establish a reliable performance difference. Therefore, this experiment demonstrates that creating an index does not guarantee that PostgreSQL will use it; the query planner selects an execution plan based on estimated cost and other factors.
